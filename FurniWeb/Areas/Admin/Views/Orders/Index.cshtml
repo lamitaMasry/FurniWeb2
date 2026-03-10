@@ -1,0 +1,45 @@
+﻿@model List<FurniWeb.Areas.Admin.Controllers.OrdersController.AdminOrderVm>
+
+<h2>Orders</h2>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="alert alert-info">No orders yet.</div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date (UTC)</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Total</th>
+                <th>Items</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var o in Model)
+            {
+                <tr>
+                    <td>@o.Id</td>
+                    <td>@o.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@o.FirstName @o.LastName</td>
+                    <td>@o.Email</td>
+                    <td>@o.Phone</td>
+                    <td>$@o.Total</td>
+                    <td>
+                        <ul style="margin:0; padding-left:18px;">
+                            @foreach (var it in o.Items)
+                            {
+                                <li>@it.ProductName x @it.Quantity ($@it.UnitPrice)</li>
+                            } 
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}  

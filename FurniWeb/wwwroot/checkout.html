@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Checkout</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container" style="max-width:1100px;padding:28px;">
+        <h2 class="mb-3">Checkout</h2>
+
+        <div id="err" class="alert alert-danger" style="display:none;"></div>
+        <div id="ok" class="alert alert-success" style="display:none;"></div>
+
+        <div class="row g-4">
+            <div class="col-12 col-lg-7">
+                <h4>Billing details</h4>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">First name *</label>
+                        <input id="firstName" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Last name *</label>
+                        <input id="lastName" class="form-control">
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Email *</label>
+                        <input id="email" type="email" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Phone *</label>
+                        <input id="phone" class="form-control">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Country *</label>
+                        <input id="country" class="form-control">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Address line 1 *</label>
+                        <input id="address1" class="form-control">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Address line 2 (optional)</label>
+                        <input id="address2" class="form-control">
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">State *</label>
+                        <input id="state" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">ZIP *</label>
+                        <input id="zip" class="form-control">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Order notes (optional)</label>
+                        <textarea id="orderNotes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-5">
+                <h4>Your order</h4>
+
+                <div class="border rounded p-3">
+                    <div id="empty" class="alert alert-info" style="display:none;">
+                        Cart is empty. <a href="/shop.html">Go to shop</a>
+                    </div>
+
+                    <div id="box" style="display:none;">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Qty</th>
+                                    <th class="text-end">Line</th>
+                                </tr>
+                            </thead>
+                            <tbody id="body"></tbody>
+                        </table>
+
+                        <div class="d-flex justify-content-between">
+                            <b>Subtotal</b>
+                            <b id="sub">$0.00</b>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <b>Total</b>
+                            <b id="tot">$0.00</b>
+                        </div>
+
+                        <button type="button" class="btn btn-dark w-100 mt-3" onclick="placeOrder()">
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCart() { try { return JSON.parse(localStorage.getItem("cart") || "[]"); } catch { return []; } }
+        function money(n) { return "$" + (Number(n) || 0).toFixed(2); }
+
+        function v(id) { return (document.getElementById(id)?.value || "").trim(); }
+        function showErr(msg) { const e = document.getElementById("err"); e.style.display = "block"; e.textContent = msg; }
+        function clearErr() { const e = document.getElementById("err"); e.style.display = "none"; e.textContent = ""; }
+        function showOk(msg) { const o = document.getElementById("ok"); o.style.display = "block"; o.textContent = msg; }
+
+        async function loadProducts() {
+            const res = await fetch("/api/products");
+            if (!res.ok) throw new Error("Cannot load products: /api/products failed (" + res.status + ")");
+            const arr = await res.json();
+            const map = {};
+            for (const p of arr) map[p.id] = p;
+            return map;
+        }
+
+        async function renderOrder() {
+            clearErr();
+            const cart = getCart();
+            const empty = document.getElementById("empty");
+            const box = document.getElementById("box");
+            const body = document.getElementById("body");
+
+            if (!cart.length) {
+                empty.style.display = "block";
+                box.style.display = "none";
+                return;
+            }
+
+            let products;
+            try {
+                products = await loadProducts();
+            } catch (e) {
+                empty.style.display = "none";
+                box.style.display = "none";
+                showErr(e.message);
+                return;
+            }
+
+            empty.style.display = "none";
+            box.style.display = "block";
+            body.innerHTML = "";
+
+            let subtotal = 0;
+
+            for (const it of cart) {
+                const p = products[Number(it.productId)];
+                const qty = Number(it.quantity || 0);
+                if (!p) continue;
+
+                const line = Number(p.price) * qty;
+                subtotal += line;
+
+                body.innerHTML += `
+            <tr>
+              <td>${p.name}</td>
+              <td class="text-end">${qty}</td>
+              <td class="text-end">${money(line)}</td>
+            </tr>`;
+            }
+
+            document.getElementById("sub").textContent = money(subtotal);
+            document.getElementById("tot").textContent = money(subtotal);
+        }
+
+        async function placeOrder() {
+            clearErr();
+
+            const required = ["firstName", "lastName", "email", "phone", "country", "address1", "state", "zip"];
+            for (const id of required) {
+                if (!v(id)) {
+                    showErr("Please fill: " + id);
+                    document.getElementById(id)?.focus();
+                    return;
+                }
+            }
+
+            const cart = getCart();
+            if (!cart.length) {
+                showErr("Cart is empty");
+                return;
+            }
+
+            const payload = {
+                firstName: v("firstName"),
+                lastName: v("lastName"),
+                email: v("email"),
+                phone: v("phone"),
+                country: v("country"),
+                address1: v("address1"),
+                address2: v("address2") || null,
+                state: v("state"),
+                zip: v("zip"),
+                orderNotes: v("orderNotes") || null,
+                items: cart
+            };
+
+            const res = await fetch("/api/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                showErr("Checkout failed: " + await res.text());
+                return;
+            }
+
+            const data = await res.json();
+            localStorage.removeItem("cart");
+            showOk("Order placed ✅ #" + data.orderId + " | Total: " + money(data.total));
+            window.location.href = "/thankyou.html";
+        }
+
+        document.addEventListener("DOMContentLoaded", renderOrder);
+    </script>
+</body>
+</html>

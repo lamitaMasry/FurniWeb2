@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
+    <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.0.36525.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Access the main web project types and EF Core packages -->
+    <ProjectReference Include="..\FurniWeb\FurniWeb.csproj" />
+  </ItemGroup>
+</Project>

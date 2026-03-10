@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cart</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container" style="max-width:1100px;padding:28px;">
+        <h2 class="mb-3">Cart</h2>
+
+        <div id="err" class="alert alert-danger" style="display:none;"></div>
+
+        <div id="empty" class="alert alert-info" style="display:none;">
+            Cart is empty. <a href="/shop.html">Go shopping</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle" id="tbl" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-end">Price</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Total</th>
+                        <th class="text-end">Remove</th>
+                    </tr>
+                </thead>
+                <tbody id="body"></tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <div style="min-width:280px;">
+                <div class="d-flex justify-content-between">
+                    <div><b>Subtotal</b></div>
+                    <div><b id="sub">$0.00</b></div>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <div><b>Total</b></div>
+                    <div><b id="tot">$0.00</b></div>
+                </div>
+
+                <div class="mt-3 d-grid gap-2">
+                    <a class="btn btn-dark" href="/checkout.html">Proceed To Checkout</a>
+                    <button class="btn btn-outline-danger" onclick="clearCart()">Clear Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CART_KEY = "furni_cart_v1";
+        const LEGACY_KEY = "cart";
+
+        function getCart() {
+            try {
+                const raw = localStorage.getItem(CART_KEY) ?? localStorage.getItem(LEGACY_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch { return []; }
+        }
+
+        function setCart(c) {
+            const raw = JSON.stringify(c);
+            localStorage.setItem(CART_KEY, raw);
+            localStorage.setItem(LEGACY_KEY, raw);
+        }
+
+        function clearCart() { localStorage.removeItem(CART_KEY); localStorage.removeItem(LEGACY_KEY); render(); }
+
+        function money(n) { return "$" + (Number(n) || 0).toFixed(2); }
+
+        async function loadProducts() {
+            const res = await fetch("/api/products");
+            if (!res.ok) throw new Error("Cannot load products: /api/products failed (" + res.status + ")");
+            const arr = await res.json();
+            const map = {};
+            for (const p of arr) map[p.id] = p;
+            return map;
+        }
+
+        function removeItem(id) {
+            id = Number(id);
+            const cart = getCart().filter(x => Number(x.productId) !== id);
+            setCart(cart);
+            render();
+        }
+
+        function changeQty(id, delta) {
+            id = Number(id);
+            const cart = getCart();
+            const it = cart.find(x => Number(x.productId) === id);
+            if (!it) return;
+            it.quantity = Math.max(1, Number(it.quantity || 1) + delta);
+            setCart(cart);
+            render();
+        }
+
+        async function render() {
+            const err = document.getElementById("err");
+            err.style.display = "none";
+            err.textContent = "";
+
+            const cart = getCart();
+            const empty = document.getElementById("empty");
+            const tbl = document.getElementById("tbl");
+            const body = document.getElementById("body");
+
+            if (!cart.length) {
+                empty.style.display = "block";
+                tbl.style.display = "none";
+                document.getElementById("sub").textContent = money(0);
+                document.getElementById("tot").textContent = money(0);
+                return;
+            }
+
+            let products;
+            try {
+                products = await loadProducts();
+            } catch (e) {
+                empty.style.display = "none";
+                tbl.style.display = "none";
+                err.style.display = "block";
+                err.textContent = e.message;
+                return;
+            }
+
+            empty.style.display = "none";
+            tbl.style.display = "table";
+            body.innerHTML = "";
+
+            let subtotal = 0;
+
+            for (const it of cart) {
+                const p = products[Number(it.productId)];
+                const qty = Number(it.quantity || 0);
+                if (!p) { continue; }
+
+                const line = Number(p.price) * qty;
+                subtotal += line;
+
+                body.innerHTML += `
+            <tr>
+              <td>${p.name}</td>
+              <td class="text-end">${money(p.price)}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-secondary" onclick="changeQty(${p.id},-1)">-</button>
+                <span style="display:inline-block;min-width:28px;">${qty}</span>
+                <button class="btn btn-sm btn-outline-secondary" onclick="changeQty(${p.id},+1)">+</button>
+              </td>
+              <td class="text-end">${money(line)}</td>
+              <td class="text-end"><button class="btn btn-sm btn-danger" onclick="removeItem(${p.id})">x</button></td>
+            </tr>`;
+            }
+
+            document.getElementById("sub").textContent = money(subtotal);
+            document.getElementById("tot").textContent = money(subtotal);
+        }
+
+        document.addEventListener("DOMContentLoaded", render);
+    </script>
+</body>
+</html>

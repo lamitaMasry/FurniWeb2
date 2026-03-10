@@ -1,0 +1,36 @@
+﻿@model FurniWeb.Models.Product
+
+<h2>Edit Product</h2>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label>Name</label>
+        <input class="form-control" asp-for="Name" />
+    </div>
+
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea class="form-control" asp-for="Description"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Price</label>
+        <input class="form-control" asp-for="Price" />
+    </div>
+
+    <div class="mb-3">
+        <label>ImageUrl</label>
+        <input class="form-control" asp-for="ImageUrl" />
+    </div>
+
+    <div class="mb-3">
+        <label>Active</label>
+        <input type="checkbox" asp-for="IsActive" />
+    </div>
+
+    <button class="btn btn-primary" type="submit">Update</button>
+    <a class="btn btn-secondary" href="/Admin/Products">Cancel</a>
+</form>
