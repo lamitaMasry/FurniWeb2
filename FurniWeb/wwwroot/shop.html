@@ -67,100 +67,8 @@
 
     <div class="untree_co-section product-section before-footer-section">
         <div class="container">
-            <div class="row">
-
-                <!-- Product 1 -->
-                <div class="col-12 col-md-4 col-lg-3 mb-5">
-                    <a class="product-item" href="#" data-product-id="1">
-                        <img src="/images/product-3.png" class="img-fluid product-thumbnail">
-                        <h3 class="product-title">Nordic Chair</h3>
-                        <strong class="product-price">$50.00</strong>
-
-                        <!-- ✅ span instead of button (no warnings) -->
-                        <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
-                            <img src="/images/cross.svg" class="img-fluid" alt="">
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Product 2 -->
-                <div class="col-12 col-md-4 col-lg-3 mb-5">
-                    <a class="product-item" href="#" data-product-id="2">
-                        <img src="/images/product-1.png" class="img-fluid product-thumbnail">
-                        <h3 class="product-title">Nordic Chair</h3>
-                        <strong class="product-price">$50.00</strong>
-
-                        <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
-                            <img src="/images/cross.svg" class="img-fluid" alt="">
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Product 3 -->
-                <div class="col-12 col-md-4 col-lg-3 mb-5">
-                    <a class="product-item" href="#" data-product-id="3">
-                        <img src="/images/product-2.png" class="img-fluid product-thumbnail">
-                        <h3 class="product-title">Kruzo Aero Chair</h3>
-                        <strong class="product-price">$78.00</strong>
-
-                        <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
-                            <img src="/images/cross.svg" class="img-fluid" alt="">
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Product 4 -->
-                <div class="col-12 col-md-4 col-lg-3 mb-5">
-                    <a class="product-item" href="#" data-product-id="4">
-                        <img src="/images/product-3.png" class="img-fluid product-thumbnail">
-                        <h3 class="product-title">Ergonomic Chair</h3>
-                        <strong class="product-price">$43.00</strong>
-
-                        <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
-                            <img src="/images/cross.svg" class="img-fluid" alt="">
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Product 5 -->
-                <div class="col-12 col-md-4 col-lg-3 mb-5">
-                    <a class="product-item" href="#" data-product-id="5">
-                        <img src="/images/product-3.png" class="img-fluid product-thumbnail">
-                        <h3 class="product-title">Nordic Chair</h3>
-                        <strong class="product-price">$50.00</strong>
-
-                        <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
-                            <img src="/images/cross.svg" class="img-fluid" alt="">
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Product 6 -->
-                <div class="col-12 col-md-4 col-lg-3 mb-5">
-                    <a class="product-item" href="#" data-product-id="6">
-                        <img src="/images/product-1.png" class="img-fluid product-thumbnail">
-                        <h3 class="product-title">Nordic Chair</h3>
-                        <strong class="product-price">$50.00</strong>
-
-                        <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
-                            <img src="/images/cross.svg" class="img-fluid" alt="">
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Product 7 -->
-                <div class="col-12 col-md-4 col-lg-3 mb-5">
-                    <a class="product-item" href="#" data-product-id="7">
-                        <img src="/images/product-2.png" class="img-fluid product-thumbnail">
-                        <h3 class="product-title">Kruzo Aero Chair</h3>
-                        <strong class="product-price">$78.00</strong>
-
-                        <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
-                            <img src="/images/cross.svg" class="img-fluid" alt="">
-                        </span>
-                    </a>
-                </div>
-
+            <div class="row" id="productsContainer">
+                <!-- Products will be loaded here by JavaScript -->
             </div>
         </div>
     </div>
@@ -174,7 +82,7 @@
         </div>
     </footer>
 
-    <!-- Add to cart handler -->
+    <!-- Add to cart handler & Load products from API -->
     <script>
         const CART_KEY = "furni_cart_v1";
         const LEGACY_KEY = "cart";
@@ -207,32 +115,110 @@
             setCart(cart);
         }
 
-        // Handle add to cart click
-        document.addEventListener("click", (e) => {
-            const btn = e.target.closest(".add-to-cart-btn");
-            if (!btn) return;
+        // Load products from API
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                if (!response.ok) throw new Error('Failed to fetch products');
+                
+                const products = await response.json();
+                const container = document.getElementById('productsContainer');
+                
+                if (!products || products.length === 0) {
+                    container.innerHTML = '<div class="col-12"><p>No products available</p></div>';
+                    return;
+                }
 
-            e.preventDefault();
-            e.stopPropagation();
+                container.innerHTML = products.map(product => `
+                    <div class="col-12 col-md-4 col-lg-3 mb-5">
+                        <a class="product-item" href="#" data-product-id="${product.id}">
+                            <img src="${product.imagePath || '/images/product-default.png'}" class="img-fluid product-thumbnail" alt="${product.name}">
+                            <h3 class="product-title">${product.name}</h3>
+                            <strong class="product-price">$${product.price.toFixed(2)}</strong>
 
-            const card = btn.closest(".product-item");
-            const id = Number(card?.dataset?.productId);
-            if (!id) {
-                alert("Missing data-product-id");
-                return;
+                            <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
+                                <img src="/images/cross.svg" class="img-fluid" alt="">
+                            </span>
+                        </a>
+                    </div>
+                `).join('');
+
+                attachCartHandlers();
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('productsContainer').innerHTML = '<div class="col-12"><p>Error loading products</p></div>';
             }
+        }
 
-            addToCart(id, 1);
-            window.location.href = "/cart.html";
-        });
+        // Attach event handlers for add to cart
+        function attachCartHandlers() {
+            document.addEventListener("click", (e) => {
+                const btn = e.target.closest(".add-to-cart-btn");
+                if (!btn) return;
 
-        // Prevent navigation when clicking product card area
-        document.addEventListener("click", (e) => {
-            const card = e.target.closest(".product-item");
-            if (!card) return;
-            if (e.target.closest(".add-to-cart-btn")) return;
-            e.preventDefault();
-        });
+                e.preventDefault();
+                e.stopPropagation();
+
+                const card = btn.closest(".product-item");
+                const id = Number(card?.dataset?.productId);
+                if (!id) {
+                    alert("Missing data-product-id");
+                    return;
+                }
+
+                addToCart(id, 1);
+                window.location.href = "/cart.html";
+            });
+
+            // Prevent navigation when clicking product card area
+            document.addEventListener("click", (e) => {
+                const card = e.target.closest(".product-item");
+                if (!card) return;
+                if (e.target.closest(".add-to-cart-btn")) return;
+                e.preventDefault();
+            });
+        }
+
+        // Load products when page loads
+        document.addEventListener('DOMContentLoaded', loadProducts);
+
+        // Refresh products every 5 seconds to catch real-time updates from admin
+        setInterval(async () => {
+            try {
+                const response = await fetch('/api/products');
+                if (response.ok) {
+                    const products = await response.json();
+                    const container = document.getElementById('productsContainer');
+                    
+                    // Only update if products have changed
+                    if (JSON.stringify(products) !== JSON.stringify(window.lastProducts)) {
+                        window.lastProducts = products;
+                        
+                        if (!products || products.length === 0) {
+                            container.innerHTML = '<div class="col-12"><p>No products available</p></div>';
+                        } else {
+                            container.innerHTML = products.map(product => `
+                                <div class="col-12 col-md-4 col-lg-3 mb-5">
+                                    <a class="product-item" href="#" data-product-id="${product.id}">
+                                        <img src="${product.imagePath || '/images/product-default.png'}" class="img-fluid product-thumbnail" alt="${product.name}">
+                                        <h3 class="product-title">${product.name}</h3>
+                                        <strong class="product-price">$${product.price.toFixed(2)}</strong>
+
+                                        <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
+                                            <img src="/images/cross.svg" class="img-fluid" alt="">
+                                        </span>
+                                    </a>
+                                </div>
+                            `).join('');
+                            
+                            attachCartHandlers();
+                        }
+                    }
+                }
+            } catch (error) {
+                // Silently fail on refresh - don't spam console
+            }
+        }, 5000); // Check every 5 seconds
     </script>
 
     <style>

@@ -18,8 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Admin\Controllers\API\" />
-    <Folder Include="Areas\Admin\Views\Checkout\" />
     <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 

@@ -17,11 +17,8 @@ namespace FurniWeb.Models
         public decimal Price { get; set; }
 
         [MaxLength(500)]
-        public string? ImagePath { get; set; } // ex: "/images/product-1.png"
-
-        // Compatibility alias for views and older code that reference "ImageUrl".
-        // Keep this as a non-mapped property so EF continues to use the existing
-        // ImagePath column in the database.
+        public string? ImagePath { get; set; }
+      
         [NotMapped]
         public string? ImageUrl
         {

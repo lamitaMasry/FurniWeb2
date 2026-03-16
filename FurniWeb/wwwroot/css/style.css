@@ -722,4 +722,41 @@ textarea {
     pointer-events: auto !important;
 }
 
+/* Admin product controls on shop page */
+.admin-product-controls {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product-card-wrapper:hover .admin-product-controls {
+    opacity: 1;
+}
+
+.admin-product-controls .btn {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+}
+
+.admin-product-controls .btn-warning {
+    background: #f9bf29;
+    border-color: #f9bf29;
+    color: #000;
+}
+
+.admin-product-controls .btn-warning:hover {
+    background: #f8b810;
+    border-color: #f8b810;
+}
+
+.admin-product-controls .btn-danger {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.admin-product-controls .btn-danger:hover {
+    background: #c82333;
+    border-color: #c82333;
+}
+
 </style >

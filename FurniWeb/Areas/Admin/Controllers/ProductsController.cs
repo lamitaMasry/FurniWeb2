@@ -87,10 +87,27 @@ public class ProductsController : Controller
         return View(product);
     }
 
+    // GET: Admin/Products/Delete/5
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var product = await _db.Products.FindAsync(id);
+        if (product == null)
+        {
+            return NotFound();
+        }
+        return View(product);
+    }
+
     // POST: Admin/Products/Delete/5
     [HttpPost]
+    [ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var product = await _db.Products.FindAsync(id);
         if (product != null)

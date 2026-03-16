@@ -21,7 +21,7 @@ namespace FurniWeb.Areas.Admin.Controllers
 
         // GET: /Admin/Account/Login
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public IActionResult Login(string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -30,7 +30,7 @@ namespace FurniWeb.Areas.Admin.Controllers
         // POST: /Admin/Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
+        public async Task<IActionResult> Login(string email, string password, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 

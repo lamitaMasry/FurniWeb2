@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace FurniWeb.Controllers;
+namespace FurniWeb.Areas.Admin.Controllers;
 
+[Area("Admin")]
 public class HomeController : Controller
 {
     // ✅ redirect MVC homepage to real static template

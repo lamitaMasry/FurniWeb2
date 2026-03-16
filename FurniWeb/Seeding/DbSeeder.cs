@@ -11,16 +11,18 @@ public static class DbSeeder
     {
         var db = sp.GetRequiredService<ApplicationDbContext>();
         
+        // Apply migrations
+        await db.Database.MigrateAsync();
+        
         // Admin user + role
         var userMgr = sp.GetRequiredService<UserManager<IdentityUser>>();
         var roleMgr = sp.GetRequiredService<RoleManager<IdentityRole>>();
 
         const string adminRole = "Admin";
         
+        // Create Admin role if it doesn't exist
         if (!await roleMgr.RoleExistsAsync(adminRole))
-        {
             await roleMgr.CreateAsync(new IdentityRole(adminRole));
-        }
 
         var email = "admin@furni.com";
         var pass = "Admin@12345";

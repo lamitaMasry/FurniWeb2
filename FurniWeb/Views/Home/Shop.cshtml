@@ -1,0 +1,143 @@
+@model List<FurniWeb.Models.Product>
+@{
+    ViewData["Title"] = "Shop";
+}
+
+<!-- Start Hero Section -->
+<div class="hero">
+    <div class="container">
+        <div class="row justify-content-between">
+            <div class="col-lg-5">
+                <div class="intro-excerpt">
+                    <h1>Shop</h1>
+                </div>
+            </div>
+            <div class="col-lg-7"></div>
+        </div>
+    </div>
+</div>
+<!-- End Hero Section -->
+
+<!-- Admin Controls -->
+@if (User.IsInRole("Admin"))
+{
+    <div class="untree_co-section bg-light">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5>Admin Controls</h5>
+                <a href="/Admin/Products/Create" class="btn btn-sm btn-success">
+                    <i class="bi bi-plus-circle"></i> Add New Product
+                </a>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Start Products Section -->
+<div class="untree_co-section product-section before-footer-section">
+    <div class="container">
+        <div class="row" id="productsContainer">
+            @if (Model != null && Model.Count > 0)
+            {
+                @foreach (var product in Model)
+                {
+                    <div class="col-12 col-md-4 col-lg-3 mb-5">
+                        <div class="product-card-wrapper" style="position: relative;">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="admin-product-controls" style="position: absolute; top: 5px; right: 5px; z-index: 10; display: flex; gap: 5px;">
+                                    <a href="/Admin/Products/Edit/@product.Id" class="btn btn-sm btn-warning" title="Edit product">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="post" action="/Admin/Products/Delete/@product.Id" style="display:inline;" onsubmit="return confirm('Delete this product?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete product">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                            <a class="product-item" href="#" data-product-id="@product.Id">
+                                <img src="@product.ImagePath" class="img-fluid product-thumbnail" alt="@product.Name">
+                                <h3 class="product-title">@product.Name</h3>
+                                <strong class="product-price">$@product.Price.ToString("N2")</strong>
+                                <span class="icon-cross add-to-cart-btn" role="button" tabindex="0" aria-label="Add to cart">
+                                    <img src="/images/cross.svg" class="img-fluid" alt="">
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <p>No products available</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<!-- End Products Section -->
+
+@section Scripts {
+    <script>
+        const CART_KEY = "furni_cart_v1";
+        const LEGACY_KEY = "cart";
+
+        function getCart() {
+            try {
+                const raw = localStorage.getItem(CART_KEY) ?? localStorage.getItem(LEGACY_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function setCart(cart) {
+            const raw = JSON.stringify(cart);
+            localStorage.setItem(CART_KEY, raw);
+            localStorage.setItem(LEGACY_KEY, raw);
+        }
+
+        function addToCart(productId, qty = 1) {
+            productId = Number(productId);
+            qty = Number(qty);
+
+            const cart = getCart();
+            const item = cart.find(x => x.productId === productId);
+
+            if (item) item.quantity = Number(item.quantity || 0) + qty;
+            else cart.push({ productId, quantity: qty });
+
+            setCart(cart);
+        }
+
+        // Handle add to cart click
+        document.addEventListener("click", (e) => {
+            const btn = e.target.closest(".add-to-cart-btn");
+            if (!btn) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const card = btn.closest(".product-item");
+            const id = Number(card?.dataset?.productId);
+            if (!id) {
+                alert("Missing data-product-id");
+                return;
+            }
+
+            addToCart(id, 1);
+            window.location.href = "/cart.html";
+        });
+
+        // Prevent navigation when clicking product card area
+        document.addEventListener("click", (e) => {
+            const card = e.target.closest(".product-item");
+            if (!card) return;
+            if (e.target.closest(".add-to-cart-btn")) return;
+            e.preventDefault();
+        });
+    </script>
+}

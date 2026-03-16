@@ -17,14 +17,18 @@ namespace FurniWeb.Areas.Admin.Controllers
             var totalProducts = await _db.Products.CountAsync();
             var totalOrders = await _db.Orders.CountAsync();
             
-            // SQLite doesn't support Sum on decimal, so we fetch and calculate on client side
-            var orderItems = await _db.OrderItems.ToListAsync();
+            // SQLite doesn't support Sum on decimal, so we need to fetch data and aggregate in memory
+            var orderItems = await _db.OrderItems
+                .AsNoTracking()
+                .Select(i => new { i.UnitPrice, i.Quantity })
+                .ToListAsync();
+            
             var totalRevenue = orderItems.Sum(i => i.UnitPrice * i.Quantity);
 
             // Use ViewBag keys expected by the dashboard view
             ViewBag.ProductsCount = totalProducts;
             ViewBag.OrdersCount = totalOrders;
-            ViewBag.Revenue = totalRevenue.ToString("F2");
+            ViewBag.Revenue = totalRevenue;
 
             return View();
         }

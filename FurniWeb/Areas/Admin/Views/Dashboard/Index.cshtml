@@ -1,27 +1,67 @@
-﻿@{
-    ViewData["Title"] = "Admin Dashboard";
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_Layout";
 }
 
-<h2>Admin Dashboard</h2>
+<div class="page-header">
+    <h1><i class="bi bi-speedometer2"></i> Dashboard</h1>
+</div>
 
-<div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:16px;">
-    <div style="border:1px solid #ddd; border-radius:12px; padding:16px; min-width:240px;">
-        <div style="font-weight:600;">Total Products</div>
-        <div style="font-size:28px; margin-top:8px;">@ViewBag.ProductsCount</div>
+<!-- Key Stats -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-box"></i>
+            </div>
+            <div class="stat-value">@ViewBag.ProductsCount</div>
+            <div class="stat-label">Total Products</div>
+        </div>
     </div>
-
-    <div style="border:1px solid #ddd; border-radius:12px; padding:16px; min-width:240px;">
-        <div style="font-weight:600;">Total Revenue</div>
-        <div style="font-size:28px; margin-top:8px;">$@ViewBag.Revenue</div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-cart-check"></i>
+            </div>
+            <div class="stat-value">@ViewBag.OrdersCount</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
     </div>
-
-    <div style="border:1px solid #ddd; border-radius:12px; padding:16px; min-width:240px;">
-        <div style="font-weight:600;">Orders</div>
-        <div style="font-size:28px; margin-top:8px;">@ViewBag.OrdersCount</div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-cash-coin"></i>
+            </div>
+            <div class="stat-value"><strong style="color: #28a745;">${@ViewBag.Revenue?.ToString("N2")}</strong></div>
+            <div class="stat-label">Total Profit</div>
+        </div>
     </div>
 </div>
 
-<div style="margin-top:18px;">
-    <a class="btn btn-primary" href="/Admin/Products">Manage Products</a>
-    <a class="btn btn-outline-secondary" href="/Admin/Orders" style="margin-left:8px;">View Orders</a>
+<!-- Dashboard Content -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Welcome to FurniWeb Admin Dashboard</h5>
+            </div>
+            <div class="card-body">
+                <p>Welcome to your admin dashboard! Here you can manage:</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <strong>Products</strong> - Add, edit, delete and manage your furniture products with images
+                        </span>
+                        <a href="/Admin/Products" class="btn btn-primary btn-sm">Manage</a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <strong>Orders</strong> - View and track customer orders with names, addresses, emails and purchased items
+                        </span>
+                        <a href="/Admin/Orders" class="btn btn-primary btn-sm">View Orders</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>

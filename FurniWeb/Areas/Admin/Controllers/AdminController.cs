@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FurniWeb.Areas.Admin.Controllers
 {
-    [Authorize(Roles = "Admin")]
-    public class AdminGateController : Controller
+    [Area("Admin")]
+    public class AdminController : Controller
     {
         [HttpGet("/admin")]
         [AllowAnonymous]

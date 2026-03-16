@@ -36,27 +36,29 @@ namespace FurniWeb.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var list = await _db.Orders
+            var orders = await _db.Orders
+                .Include(o => o.Items)
                 .AsNoTracking()
                 .OrderByDescending(o => o.CreatedAtUtc)
-                .Select(o => new AdminOrderVm
-                {
-                    Id = o.Id,
-                    CreatedAtUtc = o.CreatedAtUtc,
-                    FirstName = o.FirstName,
-                    LastName = o.LastName,
-                    Name = (o.FirstName + " " + o.LastName).Trim(),
-                    Email = o.Email,
-                    Phone = o.Phone,
-                    Total = o.TotalAmount,
-                    Items = o.Items.Select(i => new AdminOrderItemVm
-                    {
-                        ProductName = i.ProductName,
-                        Quantity = i.Quantity,
-                        UnitPrice = i.UnitPrice
-                    }).ToList()
-                })
                 .ToListAsync();
+
+            var list = orders.Select(o => new AdminOrderVm
+            {
+                Id = o.Id,
+                CreatedAtUtc = o.CreatedAtUtc,
+                FirstName = o.FirstName,
+                LastName = o.LastName,
+                Name = (o.FirstName + " " + o.LastName).Trim(),
+                Email = o.Email,
+                Phone = o.Phone,
+                Total = o.TotalAmount,
+                Items = o.Items.Select(i => new AdminOrderItemVm
+                {
+                    ProductName = i.ProductName,
+                    Quantity = i.Quantity,
+                    UnitPrice = i.UnitPrice
+                }).ToList()
+            }).ToList();
 
             return View(list);
         }
